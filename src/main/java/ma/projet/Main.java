@@ -8,6 +8,7 @@ import ma.projet.services.EmployeService;
 import ma.projet.services.EmployeTacheService; // Ajoutez cette importation
 import ma.projet.services.ProjetService;
 import ma.projet.services.TacheService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,10 +16,14 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        ProjetService projetService = new ProjetService();
-        TacheService tacheService = new TacheService();
-        EmployeService employeService = new EmployeService();
-        EmployeTacheService employeTacheService = new EmployeTacheService(); // Instance du service EmployeTache
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.scan("ma.projet");
+        context.refresh();
+
+        ProjetService projetService = context.getBean(ProjetService.class);
+        TacheService tacheService = context.getBean(TacheService.class);
+        EmployeService employeService = context.getBean(EmployeService.class);
+        EmployeTacheService employeTacheService = context.getBean(EmployeTacheService.class); // Instance du service EmployeTache
 
         Projet projet1 = new Projet();
         projet1.setNom("Gestion de stock");

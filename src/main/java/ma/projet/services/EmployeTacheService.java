@@ -6,15 +6,21 @@ import ma.projet.dao.IDao;
 import ma.projet.util.HibernateUtil;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class EmployeTacheService implements IDao<EmployeTache> {
 
+    @Autowired
+    private SessionFactory sessionFactory;
     @Override
     public boolean create(EmployeTache employeTache) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
             session.save(employeTache);
             transaction.commit();
@@ -26,30 +32,24 @@ public class EmployeTacheService implements IDao<EmployeTache> {
 
     @Override
     public EmployeTache getById(int id) {
-        Session session = null;
         EmployeTache employeTache = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             employeTache = session.get(EmployeTache.class, id);
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return employeTache;
     }
 
     @Override
     public List<EmployeTache> getAll() {
-        Session session = null;
         List<EmployeTache> employeTaches = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             employeTaches = session.createQuery("from EmployeTache ", EmployeTache.class).list();
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return employeTaches;
     }

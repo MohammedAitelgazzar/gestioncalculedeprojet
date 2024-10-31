@@ -7,19 +7,24 @@ import ma.projet.dao.IDao;
 import ma.projet.util.HibernateUtil;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class EmployeService implements IDao<Employe> {
 
+    @Autowired
+    private SessionFactory sessionFactory;
     @Override
     public boolean create(Employe o) {
-        Session session = null;
         Transaction tx = null;
         boolean status = false;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             tx = session.beginTransaction();
             session.save(o);
             tx.commit();
@@ -27,69 +32,55 @@ public class EmployeService implements IDao<Employe> {
         } catch (HibernateException e) {
             if (tx != null) tx.rollback();
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return status;
     }
 
     @Override
     public Employe getById(int id) {
-        Session session = null;
         Employe employe = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             employe = session.get(Employe.class, id);
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return employe;
     }
 
     @Override
     public List<Employe> getAll() {
-        Session session = null;
         List<Employe> employes = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             employes = session.createQuery("from Employe", Employe.class).list();
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return employes;
     }
     public List<EmployeTache> getTachesRealisees(int employeId) {
-        Session session = null;
         List<EmployeTache> employeTaches = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             employeTaches = session.createQuery("from EmployeTache where employe.id = :employeId", EmployeTache.class)
                     .setParameter("employeId", employeId)
                     .list();
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return employeTaches;
     }
 
     public List<Projet> getProjetsGerés(int employeId) {
-        Session session = null;
         List<Projet> projets = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             projets = session.createQuery("select p from Projet p where p.chefDeProjet.id = :employeId", Projet.class)
                     .setParameter("employeId", employeId)
                     .list();
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return projets;
     }

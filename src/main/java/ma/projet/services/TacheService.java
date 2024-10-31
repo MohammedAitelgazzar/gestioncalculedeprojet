@@ -5,21 +5,26 @@ import ma.projet.dao.IDao;
 import ma.projet.util.HibernateUtil;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 
+@Service
 public class TacheService implements IDao<Tache> {
 
+    @Autowired
+    private SessionFactory sessionFactory;
     @Override
     public boolean create(Tache o) {
-        Session session = null;
         Transaction tx = null;
         boolean status = false;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             tx = session.beginTransaction();
             session.save(o);
             tx.commit();
@@ -27,67 +32,54 @@ public class TacheService implements IDao<Tache> {
         } catch (HibernateException e) {
             if (tx != null) tx.rollback();
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return status;
     }
 
     @Override
     public Tache getById(int id) {
-        Session session = null;
         Tache tache = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             tache = session.get(Tache.class, id);
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return tache;
     }
 
     @Override
     public List<Tache> getAll() {
-        Session session = null;
+
         List<Tache> taches = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             taches = session.createQuery("from Tache", Tache.class).list();
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return taches;
     }
     public List<Tache> getTachesPrixSup1000() {
-        Session session = null;
         List<Tache> taches = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             taches = session.createNamedQuery("Tache.findByPrixSup1000", Tache.class).getResultList();
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return taches;
     }
     public List<Tache> getTachesRealiseesEntreDeuxDates(Date dateDebut, Date dateFin) {
-        Session session = null;
         List<Tache> taches = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            Session session = sessionFactory.openSession();
             Query<Tache> query = session.createQuery("SELECT t FROM Tache t JOIN t.employeTaches et WHERE et.dateDebutReelle BETWEEN :dateDebut AND :dateFin", Tache.class);
             query.setParameter("dateDebut", dateDebut);
             query.setParameter("dateFin", dateFin);
             taches = query.getResultList();
         } catch (HibernateException e) {
             e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
         }
         return taches;
     }
